@@ -1,16 +1,57 @@
 #Train
 from random import *
+import json
+
 
 #variable Declaration section
+trainsData,usersData,bookingsData = None,None,None
 user = {'username':'super','password':'pwd','type':'admin'}
 guestUser  = {'username':'ankit','password':'pwd','type':'guest'}
 users_list = [user,guestUser,]
+
+
+dirPath= r'D:\Ethans\Python\8-5\dataFiles'
+usersPath = dirPath + r'\user.json'
+trainsPath = dirPath + r'\train.json'
+bookingsPath = dirPath + r'\booking.json'
+
+
+def writeUsers(users_list):
+	with open(usersPath,'w') as fh:
+		json.dump(users_list,fh, indent=4)
+def readUsers():
+	with open(usersPath,'r') as fh:
+		usersData=json.load(fh)
+		return usersData
+
+
+
+
 # Schema is - trainNo,src,dest,days{},coachType{},fare{}
 trains =  {'trainNo':'1','src':'Pune', 'dest':'Delhi','days':['Mon','Tues'],'coachType':['SL','AC3'],'fare':{'SL':'500','AC3':'900'},'seats':{'SL':'60','AC3':'20'}}
 #trains =  {'trainNo':None,'src':None, 'dest':None,'days':[None],'coachType':[None],'fare':{None}}
 trains_list = [trains,]
+
+
+def writeTrains(trains_list):
+	with open(trainsPath,'w') as fh:
+		json.dump(trains_list,fh, indent=4)
+def readTrains():
+	with open(trainsPath,'r') as fh:
+		trainsData=json.load(fh)
+		return trainsData
+
+
 bookings = {'PNR':'randomNo','src':'Source','dest':'Dest','noOfSeats':'2','coachType':'AC','totalFare':'780','status':'Confirmed'}
 bookingsList=[bookings,]
+def writeBookings(bookingsList):
+	with open(bookingsPath,'w') as fh:
+		json.dump(bookingsList,fh, indent=4)
+def readBookings():
+	with open(bookingsPath,'r') as fh:
+		bookingsData=json.load(fh)
+		return bookingsData
+
 
 
 i=0
@@ -18,13 +59,15 @@ count = 0
 #temp=3
 
 def init():
-	username = None
-	password = None
+	writeTrains(trains_list)
+	writeBookings(bookingsList)
+	writeUsers(users_list)
 
 def signUp():
 	
 	flag=1
-	for x in users_list:
+	usersData = readUsers()
+	for x in usersData:#users_list:
 		while flag:	
 			username = raw_input('Enter the username: ')
 			if x['username'].upper()==username.upper():
@@ -35,6 +78,7 @@ def signUp():
 				#userType = raw_input('Enter the Type (Admin/User): ')
 				temp = {'username':username,'password':password,'type':'guest'}
 				users_list.append(temp)
+				writeUsers(users_list)
 				print 'Account Created'
  
 def splitIntoList(tempList):
@@ -69,7 +113,6 @@ def addNewTrain():
 		trains_list.append(tempTrain)
 		printHash()
 		print 'New Train with trainNo: %s Succesfully Added' %trainNo
-
 
 def modifyTrainDetails(modifyTrain):
 	for x in trains_list:
@@ -115,11 +158,13 @@ def modifyTrainDetails(modifyTrain):
 		print 'no train with trainNo: %s found.' %modifyTrain
 
 def deleteTrainDetails(deleteTrain):
-	
-	for x in trains_list:
-		if x['trainNo'].upper()==deleteTrain.upper():
-			index = trains_list.index(x)
-			trains_list.pop(index)
+	tempTrainsData = json.load(open(trainsPath))
+	size = len(tempTrainsData)
+	for x in range(size):	#trains_list:
+		if tempTrainsData[x]['trainNo'].upper()==deleteTrain.upper():
+			#index = tempTrainsData.index(x)
+			tempTrainsData.pop(x)
+			writeTrains(tempTrainsData)
 			print 'Train with trainNo %s delted!' %deleteTrain
 			break
 	else:
@@ -138,7 +183,8 @@ def setNewPassword():
 		setNewPassword()
 
 def changePassword(currentUser):
-	for x in users_list:
+	usersData = readUsers()
+	for x in usersData:	#users_list:
 		#print x
 		if x['username']==currentUser:
 			password = x['password']
@@ -154,7 +200,8 @@ def login(count):
 	password = raw_input('Enter the password: ')
 	temp = {'username':username,'password':password}
 
-	for x in users_list:
+	usersData = readUsers()
+	for x in usersData: #users_list:
 		#print x
 		if x['username'].upper()==username.upper() and x['password'].upper()==password.upper():
 			if(x['type'].lower()=='guest'):
@@ -183,11 +230,12 @@ def login(count):
 
 def showAllTrains():
 	printHash()
-	listLength = len(trains_list)
+	trainsData = readTrains()
+	listLength = len(trainsData)	#trains_list)
 	if(listLength==0):
 		print 'Sorry!\nNo Trains details available at the moment.'
 	else:
-		for x in trains_list:
+		for x in trainsData:	#trains_list:
 			print 'TrainNo: ',x['trainNo']
 			print 'Source: ',x['src']#trains.get('src')
 			print 'Destination: ',x['dest']#trains.get('dest')
@@ -198,7 +246,8 @@ def showAllTrains():
 			print '-'*30
 
 def calculateFare(trainNo,noOfSeats,coachType):
-	for x in trains_list:
+	trainsData = readTrains()
+	for x in trainsData: #trains_list:
 			if x['trainNo'].upper()==trainNo.upper():
 				perPersonFare = x['fare']
 				perPersonFare = perPersonFare[coachType]
@@ -210,12 +259,12 @@ def trainEnquiry(source,dest):
 	#train, source, dest,noOfSeats=0,seatType=None
 	#showAllTrains()
 	printHash()
-	
+	trainsData = readTrains()
 	listLength = len(trains_list)
 	if(listLength==0):
 		print 'Sorry!\nNo Trains details available at the moment.'
 	else:
-		for x in trains_list:
+		for x in trainsData: #trains_list:
 			if x['src'].upper()==source.upper() and x['dest'].upper()==dest.upper():
 				printHash()
 				print 'TrainNo:',x['trainNo']
@@ -232,7 +281,8 @@ def trainEnquiry(source,dest):
 def pnrStatus(PNR=None):
 	if PNR == None:
 		PNR = raw_input('Enter PNR no. : ')
-	for x in bookingsList:
+	bookingsData = readBookings()
+	for x in bookingsData: #bookingsList:
 			if x['PNR']==PNR:
 				print 'Current Status: ', x['status']
 				print 'noOfSeats: ',x['noOfSeats']
@@ -242,8 +292,9 @@ def pnrStatus(PNR=None):
 def cancelReservation():
 	PNR = pnrStatus()
 	choice=raw_input('Are you sure you want to cancelReservation? (Yes/No) ')
+	bookingsData = readBookings()
 	if choice in ['y', 'Y', 'yes', 'Yes', 'YES']:
-		for x in bookingsList:
+		for x in bookingsData: #bookingsList:
 			if x['PNR'].upper()==PNR.upper():
 				x['status']='Cancelled'
 	printHash()
@@ -251,7 +302,8 @@ def cancelReservation():
 
 def updateTrainSeats(trainNo,coachType,noOfSeats):
 	flag=False
-	for x in trains_list:
+	trainsData = readTrains()
+	for x in trainsData: #trains_list:
 		if x['trainNo'].upper()==trainNo.upper():
 			tempSeats= x['seats']
 			if coachType in tempSeats:
@@ -315,6 +367,7 @@ def bookTrain():
 		status='Confirmed'
 		temp={'PNR':PNR,'src':source,'dest':dest,'noOfSeats':noOfSeats,'coachType':coachType,'totalFare':totalFare,'status':status}
 		bookingsList.append(temp)
+		writeBookings(bookingsList)
 		printHash()
 	else:
 		status='Waiting'
@@ -411,6 +464,7 @@ def main():
 		print '1. Log in'
 		print '2. Sign Up'
 		print '3. Exit'
+		init()
 		printHash()
 		i = int(raw_input('Please enter your choice: '))
 		printHash()
