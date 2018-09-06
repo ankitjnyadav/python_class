@@ -8,5 +8,10 @@
         "username": "ankit", 
         "password": "pwd", 
         "type": "guest"
+    }, 
+    {
+        "username": "ankitK", 
+        "password": "pwd", 
+        "type": "guest"
     }
 ]
